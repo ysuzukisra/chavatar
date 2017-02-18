@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+</head>
+<body>
+  <form>
+    <label>色相(0～359)：</label>
+      <input id="tcampany" type="text" size="3" onKeyup='$("#campany").value=this.value; doit()' />
+      <input id="campany" type="range" min="0" max="359" value="359" onInput='$("#tcampany").value=this.value; doit()' />
+    <label>彩度(0～100)：</label>
+      <input id="tsei" type="text" size="3" onKeyup='$("#sei").value=this.value; doit()' />
+      <input id="sei" type="range" min="0" max="100" value="100" onInput='$("#tsei").value=this.value; doit()' />%
+    <label>明度(0～100)：</label>
+      <input id="tmei" type="text" size="3" onKeyup='$("#mei").value=this.value; doit()' />
+      <input id="mei" type="range" min="0" max="100" value="50" onInput='$("#tmei").value=this.value; doit()' />%
+    <input type="button" value="表示" onClick='doit()' />
+  </form>
+  <hr>
+  <canvas id="canvas" width="64" height="64"></canvas>
+<script>
+function $(p) {return document.getElementById(p.substring(1))}
+function chavatar(canvas, campany, sei, mei) {
+  var context = canvas.getContext("2d");
+  var width = canvas.width, height = canvas.height;
+  context.fillStyle = "hsl(" + campany + ", " + sei + "%, " + mei + "%)";
+  context.fillRect(0,0,width,height);
+}
+function doit() {
+  chavatar($("#canvas"), $("#campany").value, $("#sei").value, $("#mei").value);
+  return true;
+}
+doit();
+</script>

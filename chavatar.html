@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>文字</title>
+</head>
+<body>
+  <h1>文字アバター</h1>
+  <hr>
+  <form>
+    <label>会社：</label>
+      <input id="campany" type="text" placeholder="例）IBM" value="IBM" autofocus onkeyup='doit()' />
+    <label>姓</label>
+      <input id="sei" type="text" placeholder="例）山田"  value="山田" onkeyup='doit()' />
+    <label>名</label>
+      <input id="mei" type="text" placeholder="例）太郎（省略可）" value=""  onkeyup='doit()' />
+    <label>サイズ</label>
+      <input id="szlabel" type="number" min="32" max="512" step="32" size="3em" value="64" onchange="szChange()" />
+    <input type="button" value="生成" onClick='doit()' />
+  </form>
+  <hr>
+  <canvas id="canvas" width="64" height="64"></canvas>
+<script>
+$ = function(p) {return document.getElementById(p.substring(1))};
+(function(cl){
+  var strToHSL = function(str) {
+    var hue = 0, saturation = 1.0, lightness = 70;
+    // FMV-1a 64bit hash for hue
+    var FNV_prime = 1099511628211, offset_basis = 14695981039346656037;
+    hue = offset_basis;
+    for (var i=0 ; i<str.length ; i++) {
+      hue = hue ^ str.charCodeAt(i);
+      hue *= FNV_prime;
+      var ch = str.charCodeAt(i), ch2 = str.charCodeAt((i+1)%str.length);
+      saturation = saturation * (1.0 - (ch2 - ch)/ch) * 0.9;
+      if (saturation <= 0) {
+        saturation = 1.0;
+      }
+    }
+    hue = hue % 360;
+    // 彩度は 40～80% にマッピングする
+    saturation = (saturation * 40 + 40) % 100;
+    return [hue, saturation.toFixed(), lightness];
+  };
+  var toHSLCode = function(hsl) {
+    return "hsl(" + hsl[0] + "," + hsl[1] + "%," + hsl[2] +"%)";
+  };
+  cl.prototype.toHSLCode = function() {
+    return toHSLCode(strToHSL(this));
+  };
+  cl.prototype.toHSLCodeNeg = function() {
+    var hue, saturation, lightness;
+    [hue, saturation, lightness] = strToHSL(this);
+    lightness = 40;
+    hue = (hue + 5) % 360;
+    return toHSLCode([hue, saturation, lightness]);
+  };
+})(String);
+function doit() {
+  chavatar($("#canvas"), $("#campany").value, $("#sei").value, $("#mei").value);
+}
+function chavatar(canvas, campany, sei, mei) {
+  var context = canvas.getContext("2d");
+  var width = canvas.width, height = canvas.height;
+  var logo;
+  if (mei.length <= 0) {
+    logo = sei.substring(0,2);
+  } else {
+    logo = sei.substring(0,1) + mei.substring(0,1);
+  }
+  var adjFontSize = 0.47; //(logo.charCodeAt(0) < 128 && logo.charCodeAt(1) < 128) ? 0.6 : 0.47;
+  context.grobalAlpha = 0.0;
+  context.fillStyle = campany.toUpperCase().toHSLCode();
+  console.log(campany.toUpperCase().toHSLCode());
+  //context.fillRect(0, 0, width, height);
+  context.arc(width/2, height/2, Math.min(width, height)/2, 0, 3.14*2+1);
+  context.fill();
+  context.font =  (Math.min(width, height)*adjFontSize) + "px Broadway,'HG創英角ﾎﾟｯﾌﾟ体','メイリオ','Meiryo'";
+  context.textAlign = "center";
+  context.fillStyle = campany.toUpperCase().toHSLCodeNeg();
+  context.fillText(logo, width/2, height/1.5);
+}
+function szChange() {
+  var size = $("#szlabel").value;
+  $("#canvas").width = size;
+  $("#canvas").height = size;
+  doit();
+}
+doit();
+</script>
+</body>
+</html>
